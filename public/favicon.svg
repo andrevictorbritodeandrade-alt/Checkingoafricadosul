@@ -1,0 +1,26 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fundo Sólido (Quadrado para Maskable Icon - O OS vai arredondar conforme o padrão do celular) -->
+  <rect width="512" height="512" fill="#007749"/>
+  
+  <!-- Círculo de Brilho -->
+  <circle cx="256" cy="256" r="220" stroke="#FFB81C" stroke-width="12" opacity="0.3"/>
+  
+  <!-- Globo Terrestre Estilizado -->
+  <circle cx="256" cy="256" r="160" fill="#005a37" stroke="white" stroke-width="4" stroke-dasharray="20 10" opacity="0.5"/>
+  
+  <!-- Avião em Ascensão -->
+  <g transform="translate(256, 256) rotate(-45)">
+    <path d="M0 160V-140" stroke="white" stroke-width="20" stroke-linecap="round" stroke-dasharray="1 40" opacity="0.6"/>
+    <path d="M0 -150 L30 -100 L0 -115 L-30 -100 Z" fill="white"/>
+    <rect x="-35" y="-95" width="70" height="12" rx="6" fill="white"/>
+    <rect x="-15" y="-30" width="30" height="8" rx="4" fill="white"/>
+  </g>
+
+  <!-- Elemento da Bandeira -->
+  <path d="M0 120 L180 256 L0 392 Z" fill="#FFB81C"/>
+  <path d="M0 80 L230 256 L0 432" stroke="white" stroke-width="24" stroke-linecap="round" fill="none"/>
+  <path d="M0 80 L230 256 L0 432" stroke="#E03C31" stroke-width="12" stroke-linecap="round" fill="none"/>
+
+  <!-- Letra G Estilizada -->
+  <text x="340" y="440" fill="white" font-family="sans-serif" font-weight="900" font-size="120" style="filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5))">GO!</text>
+</svg>

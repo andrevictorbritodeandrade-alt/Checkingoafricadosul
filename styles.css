@@ -1,0 +1,53 @@
+
+/* Global font reset */
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6, button, input {
+  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+}
+
+/* Custom scrollbar for better mobile feel */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f9fafb;
+}
+::-webkit-scrollbar-thumb {
+  background: #15803d; /* green-700 */
+  border-radius: 10px;
+}
+
+/* Tribal/Ethnic Textures for buttons */
+.bg-tribal-dark {
+  background-image: url('https://www.transparenttextures.com/patterns/dark-matter.png'), linear-gradient(to bottom, #2a2a2a, #1a1a1a);
+  background-blend-mode: overlay;
+}
+
+.bg-tribal-gold {
+  background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png'), linear-gradient(to bottom, #4a3a2a, #2a1a0a);
+  background-blend-mode: multiply;
+}
+
+.bg-tribal-green {
+  background-image: url('https://www.transparenttextures.com/patterns/diagonal-striped-brick.png'), linear-gradient(to bottom, #004d2c, #002d1a);
+  background-blend-mode: overlay;
+}
+
+.bg-tribal-blue {
+  background-image: url('https://www.transparenttextures.com/patterns/fabric-of-squares.png'), linear-gradient(to bottom, #001489, #000a4d);
+  background-blend-mode: overlay;
+}
+
+.bg-tribal-red {
+  background-image: url('https://www.transparenttextures.com/patterns/pinstripe-dark.png'), linear-gradient(to bottom, #E03C31, #8b1e17);
+  background-blend-mode: overlay;
+}
+
+.text-shadow-heavy {
+  text-shadow: 4px 4px 8px rgba(0,0,0,0.9), -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+}
