@@ -1,39 +1,33 @@
+
 {
   "name": "Check-In, GO! África do Sul",
   "short_name": "Check-In GO!",
   "description": "Seu companheiro definitivo de viagem para a África do Sul.",
-  "id": "/?source=pwa",
-  "start_url": "/index.html",
-  "scope": "/",
+  "id": "checkin-go-sa-v1",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#007749",
   "orientation": "portrait",
-  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/favicon.svg",
-      "type": "image/svg+xml",
+      "src": "./icon-192.png",
+      "type": "image/png",
       "sizes": "192x192",
       "purpose": "any"
     },
     {
-      "src": "/favicon.svg",
-      "type": "image/svg+xml",
+      "src": "./icon-192.png",
+      "type": "image/png",
       "sizes": "192x192",
       "purpose": "maskable"
     },
     {
-      "src": "/favicon.svg",
-      "type": "image/svg+xml",
+      "src": "./icon-512.png",
+      "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any"
-    },
-    {
-      "src": "/favicon.svg",
-      "type": "image/svg+xml",
-      "sizes": "512x512",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
   "categories": ["travel", "productivity", "lifestyle"]

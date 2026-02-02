@@ -22,35 +22,54 @@ interface WeatherState {
   rainProb: number;
 }
 
+// Fallback para Sandton (Joanesburgo) se GPS falhar
+const FALLBACK_LAT = -26.1076;
+const FALLBACK_LON = 28.0567;
+const FALLBACK_NAME = "SANDTON (GPS OFF)";
+
 const WeatherCardHome: React.FC = () => {
-  const [locationName, setLocationName] = useState<string>('BUSCANDO...');
+  const [locationName, setLocationName] = useState<string>('LOCALIZANDO...');
   const [weather, setWeather] = useState<WeatherState | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchWeather = async (lat: number, lon: number, name?: string) => {
+  const fetchWeather = async (lat: number, lon: number, customName?: string) => {
     try {
-      if (!name) {
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=12`);
-        const data = await response.json();
-        const place = data.address.city || data.address.town || data.address.suburb || "S. AFRICA";
-        setLocationName(place.toUpperCase());
+      // 1. Tentar obter nome do local (Nominatim)
+      if (!customName) {
+        try {
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=12`);
+          if (response.ok) {
+            const data = await response.json();
+            const place = data.address.city || data.address.town || data.address.suburb || "S. AFRICA";
+            setLocationName(place.toUpperCase());
+          } else {
+            setLocationName("ÁFRICA DO SUL");
+          }
+        } catch {
+          setLocationName("COORDENADAS");
+        }
       } else {
-        setLocationName(name.toUpperCase());
+        setLocationName(customName.toUpperCase());
       }
 
+      // 2. Obter clima (OpenMeteo)
       const wData = await getWeather(lat, lon);
-      setWeather({
-        temp: wData.temp,
-        tempMax: wData.tempMax,
-        tempMin: wData.tempMin,
-        feelsLike: wData.feelsLike,
-        humidity: wData.humidity,
-        windSpeed: wData.windSpeed,
-        rainProb: wData.rainProb
-      });
+      if (wData) {
+        setWeather({
+          temp: wData.temp,
+          tempMax: wData.tempMax,
+          tempMin: wData.tempMin,
+          feelsLike: wData.feelsLike,
+          humidity: wData.humidity,
+          windSpeed: wData.windSpeed,
+          rainProb: wData.rainProb
+        });
+      } else {
+        throw new Error("Dados de clima vazios");
+      }
     } catch (e) {
       console.error("Erro ao buscar clima:", e);
-      setLocationName("ERRO");
+      setLocationName("OFFLINE");
     } finally {
       setLoading(false);
     }
@@ -58,18 +77,20 @@ const WeatherCardHome: React.FC = () => {
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      fetchWeather(-33.9249, 18.4241, "CIDADE DO CABO");
+      fetchWeather(FALLBACK_LAT, FALLBACK_LON, FALLBACK_NAME);
       return;
     }
 
+    // Tenta obter GPS com timeout curto (5s). Se falhar, usa Sandton.
     navigator.geolocation.getCurrentPosition(
       (position) => {
         fetchWeather(position.coords.latitude, position.coords.longitude);
       },
-      () => {
-        fetchWeather(-33.9249, 18.4241, "CIDADE DO CABO");
+      (error) => {
+        console.warn("GPS falhou ou negado, usando Sandton:", error);
+        fetchWeather(FALLBACK_LAT, FALLBACK_LON, FALLBACK_NAME);
       },
-      { timeout: 8000 }
+      { timeout: 5000, enableHighAccuracy: false }
     );
   }, []);
 
@@ -80,7 +101,7 @@ const WeatherCardHome: React.FC = () => {
         {/* Top: Location */}
         <div className="flex items-center gap-1 w-full justify-center pt-1">
           <MapPin className="w-3.5 h-3.5 text-sa-gold shrink-0" />
-          <span className="text-[10px] font-black uppercase tracking-widest truncate max-w-[90px]">
+          <span className="text-[9px] font-black uppercase tracking-widest truncate max-w-[90px]">
             {locationName}
           </span>
         </div>
@@ -132,8 +153,9 @@ const WeatherCardHome: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-[10px] text-red-500 font-black">
-            ERRO
+          <div className="flex-1 flex flex-col items-center justify-center gap-2">
+             <CloudSun className="w-8 h-8 text-sa-gold/50" />
+             <span className="text-[9px] font-black text-red-400 uppercase">OFFLINE</span>
           </div>
         )}
       </div>

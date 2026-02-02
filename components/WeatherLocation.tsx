@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Cloud, 
@@ -27,43 +28,57 @@ const WeatherLocation: React.FC = () => {
   const getPlaceName = async (lat: number, lon: number) => {
     try {
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`);
+      if (!response.ok) return "Localização Detectada";
       const data = await response.json();
-      return data.address.city || data.address.town || data.address.suburb || data.address.state || "Local Desconhecido";
+      return data.address.city || data.address.town || data.address.suburb || data.address.state || "África do Sul";
     } catch (e) {
       return "Coordenadas Ativas";
     }
   };
 
-  const initData = () => {
-    if (!navigator.geolocation) {
-      setError("GPS não suportado.");
-      return;
-    }
+  const useFallback = async () => {
+     // Fallback para Sandton
+     const lat = -26.1076;
+     const lon = 28.0567;
+     setLocation({ name: "Sandton (Padrão)", lat, lon, altitude: 1500 });
+     try {
+        const wData = await getWeather(lat, lon);
+        setWeather(wData);
+        setError("GPS Indisponível. Mostrando Sandton.");
+     } catch (e) {
+        setError("Sem conexão para clima.");
+     } finally {
+        setLoading(false);
+     }
+  };
 
+  const initData = () => {
     setLoading(true);
     setError(null);
+
+    if (!navigator.geolocation) {
+      useFallback();
+      return;
+    }
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude, altitude } = position.coords;
-        const placeName = await getPlaceName(latitude, longitude);
+        // Carrega dados paralelos para velocidade
+        const placeNamePromise = getPlaceName(latitude, longitude);
+        const weatherPromise = getWeather(latitude, longitude);
+
+        const [placeName, wData] = await Promise.all([placeNamePromise, weatherPromise]);
         
         setLocation({ name: placeName, lat: latitude, lon: longitude, altitude });
-
-        try {
-          const wData = await getWeather(latitude, longitude);
-          setWeather(wData);
-        } catch (e) {
-          console.error("Erro clima", e);
-        } finally {
-          setLoading(false);
-        }
+        setWeather(wData);
+        setLoading(false);
       },
       (err) => {
-        setLoading(false);
-        setError("Ative o GPS para ver o clima.");
+        console.warn("Erro GPS", err);
+        useFallback();
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: false, timeout: 8000 } // Timeout relaxado para 8s
     );
   };
 
@@ -103,7 +118,7 @@ const WeatherLocation: React.FC = () => {
             </div>
           ) : (
              <div className="h-24 flex items-center text-slate-500 italic text-sm">
-                Aguardando dados do satélite...
+                {loading ? "Contatando satélite..." : "Dados indisponíveis."}
              </div>
           )}
 
@@ -132,7 +147,7 @@ const WeatherLocation: React.FC = () => {
             <Mountain className="w-5 h-5 text-sa-green" />
             <div>
                <span className="text-[9px] font-bold text-slate-400 uppercase">Altitude Atual</span>
-               <p className="font-black text-slate-800">{location?.altitude ? `${Math.round(location.altitude)}m` : '--'}</p>
+               <p className="font-black text-slate-800">{location?.altitude ? `${Math.round(location.altitude)}m` : 'Estimado'}</p>
             </div>
          </div>
          <button 
@@ -144,8 +159,8 @@ const WeatherLocation: React.FC = () => {
       </div>
 
       {error && (
-        <div className="bg-red-50 p-4 rounded-2xl border border-red-100 flex items-center gap-3 text-red-600 text-xs font-bold animate-in bounce-in">
-           <AlertCircle className="w-5 h-5" />
+        <div className="bg-amber-50 p-4 rounded-2xl border border-amber-100 flex items-center gap-3 text-amber-700 text-xs font-bold animate-in bounce-in">
+           <AlertCircle className="w-5 h-5 shrink-0" />
            {error}
         </div>
       )}

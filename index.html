@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
@@ -9,19 +10,19 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Check-In GO!" />
     <meta name="application-name" content="Check-In GO!" />
-    
-    <!-- Estilo da Barra de Status (Deve combinar com o manifest para transição suave) -->
-    <meta name="theme-color" content="#007749" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- Estilo da Barra de Status -->
+    <meta name="theme-color" content="#007749" />
     <meta name="msapplication-navbutton-color" content="#007749">
     <meta name="description" content="Seu guia offline para a África do Sul." />
     
     <title>Check-In, GO!</title>
     
-    <!-- Links Absolutos (/) para garantir carregamento PWA -->
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <!-- Links PWA -->
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="icon" type="image/png" href="./icon-192.png" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -75,14 +76,13 @@
 </head>
   <body class="bg-black text-slate-800 antialiased selection:bg-sa-gold selection:text-sa-black font-sans overscroll-none">
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="./index.tsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          // Registro do Service Worker na raiz
-          navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('SW registrado com sucesso:', reg.scope))
-            .catch(err => console.error('Erro ao registrar SW:', err));
+          navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('SW registrado. Escopo:', reg.scope))
+            .catch(err => console.error('Falha no SW:', err));
         });
       }
     </script>
