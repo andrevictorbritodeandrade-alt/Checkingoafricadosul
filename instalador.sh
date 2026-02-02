@@ -6,9 +6,8 @@ mkdir -p services
 mkdir -p components
 
 # 2. Gerar Ícones PNG (Base64 decode de um quadrado verde #007749)
-# Isso resolve o problema do Android não instalar PWA com ícones SVG
-echo "iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAMAAABlApw1AAAAZFBMVEUAAADABHf///+8AmS9AmW+AmW/AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmV1Fvc5AAAAIHRSTlMAGPjCw30ZJcLg7yS+1Mq6Dgv14+IdT0U7OAvs26KekoK/sKIAAACnSURBVHja7cEBDQAAAMKg909tDwcUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAezAAAd5n3OQAAAAASUVORK5CYII=" | base64 -d > public/icon-192.png
-echo "iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAMAAADDpiTIAAAAZFBMVEUAAADABHf///+8AmS9AmW+AmW/AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmV1Fvc5AAAAIHRSTlMAGPjCw30ZJcLg7yS+1Mq6Dgv14+IdT0U7OAvs26KekoK/sKIAAADnSURBVHja7cEBDQAAAMKg909tDwcUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwDBQAQAAGap1QAAAAASUVORK5CYII=" | base64 -d > public/icon-512.png
+echo "iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAMAAABlApw1AAAAZFBMVEUAAADABHf///+8AmS9AmW+AmW/AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmV1Fvc5AAAAIHRSTlMAGPjCw30ZJcLg7yS+1Mq6Dgv14+IdT0U7OAvs26KekoK/sKIAAACnSURBVHja7cEBDQAAAMKg909tDwcUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAezAAAd5n3OQAAAAASUVORK5CYII=" | base64 -d > public/icon-192.png
+echo "iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAMAAADDpiTIAAAAZFBMVEUAAADABHf///+8AmS9AmW+AmW/AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmW+AmV1Fvc5AAAAIHRSTlMAGPjCw30ZJcLg7yS+1Mq6Dgv14+IdT0U7OAvs26KekoK/sKIAAADnSURBVHja7cEBDQAAAMKg909tDwcUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwDBQAQAAGap1QAAAAASUVORK5CYII=" | base64 -d > public/icon-512.png
 
 # Copia o 192 para maskable também
 cp public/icon-192.png public/icon-192-maskable.png
@@ -110,7 +109,7 @@ cat << 'EOF' > metadata.json
 }
 EOF
 
-# --- INDEX.HTML (Atualizado para PWA e SW) ---
+# --- INDEX.HTML (CORRIGIDO: Caminhos Relativos ./) ---
 
 cat << 'EOF' > index.html
 <!DOCTYPE html>
@@ -133,10 +132,10 @@ cat << 'EOF' > index.html
     
     <title>Check-In, GO!</title>
     
-    <!-- Links PWA: Apontando para PNGs para garantir instalação -->
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="icon" type="image/png" href="/icon-192.png" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <!-- FIX: Usando ./ para garantir caminhos relativos -->
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="icon" type="image/png" href="./icon-192.png" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -190,11 +189,14 @@ cat << 'EOF' > index.html
 </head>
   <body class="bg-black text-slate-800 antialiased selection:bg-sa-gold selection:text-sa-black font-sans overscroll-none">
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="./index.tsx"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js');
+          // FIX: ./sw.js resolve o problema de Cross-Origin em previews
+          navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('SW registrado com sucesso em:', reg.scope))
+            .catch(err => console.error('Erro ao registrar SW:', err));
         });
       }
     </script>
@@ -436,33 +438,34 @@ export const ONE_HOUR_MS = 3600 * 1000;
 export const EXPENSES_STORAGE_KEY = 'checkin_go_expenses_v1';
 EOF
 
-# --- MANIFESTO (CORRIGIDO PARA PNG E START_URL) ---
+# --- MANIFESTO (CORRIGIDO: Caminhos Relativos ./) ---
 
 cat << 'EOF' > public/manifest.json
 {
   "name": "Check-In, GO! África do Sul",
   "short_name": "Check-In GO!",
   "description": "Seu guia offline para a África do Sul.",
-  "start_url": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#007749",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "./icon-192.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any"
     },
     {
-      "src": "/icon-192-maskable.png",
+      "src": "./icon-192-maskable.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "./icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
@@ -489,46 +492,67 @@ cat << 'EOF' > public/favicon.svg
 </svg>
 EOF
 
-# --- SERVICE WORKER (ATUALIZADO PARA CACHE FIRST) ---
+# --- SERVICE WORKER (CACHE FIRST + RELATIVE PATHS) ---
 
 cat << 'EOF' > public/sw.js
-const CACHE_NAME = 'checkingo-v1';
-const OFFLINE_URLS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
+const CACHE_NAME = 'checkin-go-v18-offline-fixed';
+// FIX: Caminhos relativos para garantir funcionamento em preview e produção
+const CORE_ASSETS = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
+  './favicon.svg',
+  './styles.css'
 ];
 
-// Instalação: Salva o básico no cache
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(OFFLINE_URLS))
-  );
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS))
+  );
 });
 
-// Estratégia: Cache First (Tenta o cache, se não tiver, vai na rede)
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => Promise.all(
+      keys.map((key) => key !== CACHE_NAME && caches.delete(key))
+    ))
+  );
+  self.clients.claim();
+});
+
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request).then((networkResponse) => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          // Salva novas rotas/arquivos no cache automaticamente
-          if (event.request.method === 'GET') {
-            cache.put(event.request, networkResponse.clone());
+  const url = new URL(event.request.url);
+
+  // Estratégia Cache-First para navegação, scripts e estilos
+  if (event.request.mode === 'navigate' || 
+      url.pathname.endsWith('.js') || 
+      url.pathname.endsWith('.css') || 
+      url.pathname.endsWith('.png') ||
+      url.pathname.endsWith('.svg')) {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        // Retorna o cache IMEDIATAMENTE se existir
+        if (cachedResponse) return cachedResponse;
+
+        // Se não estiver no cache, tenta a rede e salva para a próxima
+        return fetch(event.request).then((networkResponse) => {
+          if (networkResponse.ok) {
+            const cacheCopy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cacheCopy));
           }
           return networkResponse;
+        }).catch(() => {
+           // Fallback para index.html se estiver offline e navegando
+           if (event.request.mode === 'navigate') {
+             return caches.match('./index.html');
+           }
         });
-      });
-    }).catch(() => {
-      // Se estiver offline e tentar navegar, entrega o index.html
-      if (event.request.mode === 'navigate') {
-        return caches.match('/index.html');
-      }
-    })
-  );
+      })
+    );
+  }
 });
 EOF
 
@@ -1496,4 +1520,4 @@ const App: React.FC = () => {
 export default App;
 EOF
 
-echo "App criado com sucesso! Ícones PNG gerados e Manifesto atualizado."
+echo "App criado com sucesso! PWA corrigido (Caminhos Relativos + SW Cache-First)."
